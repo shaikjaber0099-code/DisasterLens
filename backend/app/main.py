@@ -20,6 +20,7 @@ from backend.app.api.sensors import router as sensors_router
 from backend.app.api.weather import router as weather_router
 from backend.app.api.reports import router as reports_router
 from backend.app.api.evaluation import router as evaluation_router
+from backend.app.api.webhooks import router as webhooks_router
 
 # Background scheduler for live IoT sensors & weather
 scheduler = BackgroundScheduler()
@@ -87,6 +88,8 @@ app.include_router(sensors_router, prefix=settings.API_PREFIX)
 app.include_router(weather_router, prefix=settings.API_PREFIX)
 app.include_router(reports_router, prefix=settings.API_PREFIX)
 app.include_router(evaluation_router, prefix=settings.API_PREFIX)
+app.include_router(webhooks_router, prefix=settings.API_PREFIX)
+app.include_router(webhooks_router) # Mounts root /webhooks/twilio/inbound & /zones/{zone_id}/replies
 
 @app.get("/")
 def root():

@@ -19,6 +19,15 @@ class Settings(BaseSettings):
     FIRMS_MAP_KEY: str = ""
     SENTINEL_CLIENT_ID: str = ""
     SENTINEL_CLIENT_SECRET: str = ""
+    CARTO_API_KEY: str = ""
+    
+    # Twilio (SMS & WhatsApp Alerting)
+    TWILIO_ACCOUNT_SID: str = ""
+    TWILIO_AUTH_TOKEN: str = ""
+    TWILIO_SMS_FROM_NUMBER: str = ""
+    TWILIO_WHATSAPP_FROM_NUMBER: str = "whatsapp:+14155238886"
+    TWILIO_FROM_NUMBER: str = ""
+    TWILIO_WHATSAPP_FROM: str = "whatsapp:+14155238886"
     
     # Supabase (optional)
     SUPABASE_URL: str = ""

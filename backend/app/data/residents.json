@@ -1,0 +1,92 @@
+[
+  {
+    "id": "res_001",
+    "name": "Team Lead / Operations Dispatch",
+    "phone_number": "+12345678901",
+    "latitude": 39.4750,
+    "longitude": -0.3800,
+    "zone_name": "Valencia Metropolitan Basin",
+    "notes": "Replace with real team mobile number"
+  },
+  {
+    "id": "res_002",
+    "name": "Maria Gonzalez",
+    "phone_number": "+34612345678",
+    "latitude": 39.4650,
+    "longitude": -0.3720,
+    "zone_name": "Valencia Metropolitan Basin",
+    "notes": "Poblats Marítims resident"
+  },
+  {
+    "id": "res_003",
+    "name": "David MacLeod",
+    "phone_number": "+17805550192",
+    "latitude": 52.8760,
+    "longitude": -118.0800,
+    "zone_name": "Jasper National Park Firefront",
+    "notes": "Jasper Townsite residential sector"
+  },
+  {
+    "id": "res_004",
+    "name": "Carlos Silva",
+    "phone_number": "+5567999881122",
+    "latitude": -17.5180,
+    "longitude": -56.8900,
+    "zone_name": "Pantanal Wetland Fire Complex",
+    "notes": "Corumbá Wetland Eco-Reserve station"
+  },
+  {
+    "id": "res_005",
+    "name": "Elena Kostas",
+    "phone_number": "+306912345678",
+    "latitude": 39.6420,
+    "longitude": 22.4250,
+    "zone_name": "Thessaly Agricultural Plains",
+    "notes": "Larissa River levee agricultural quadrant"
+  },
+  {
+    "id": "res_006",
+    "name": "John Callahan",
+    "phone_number": "+15305550144",
+    "latitude": 39.7580,
+    "longitude": -121.6250,
+    "zone_name": "Sierra Foothills Wildfire Zone",
+    "notes": "Paradise Ridge residential corridor"
+  },
+  {
+    "id": "res_007",
+    "name": "Ananya Nair",
+    "phone_number": "+919876543210",
+    "latitude": 11.6880,
+    "longitude": 76.1350,
+    "zone_name": "Wayanad Monsoon Inundation Zone",
+    "notes": "Meppadi hillside hamlet"
+  },
+  {
+    "id": "res_008",
+    "name": "Liam Bennett",
+    "phone_number": "+61412345678",
+    "latitude": -21.4100,
+    "longitude": 117.8450,
+    "zone_name": "Pilbara Remote Bushfire Corridor",
+    "notes": "Karratha transport outpost"
+  },
+  {
+    "id": "res_009",
+    "name": "Emergency Team Member Alpha",
+    "phone_number": "+10000000001",
+    "latitude": 39.7600,
+    "longitude": -121.6200,
+    "zone_name": "Sierra Foothills Wildfire Zone",
+    "notes": "Team placeholder"
+  },
+  {
+    "id": "res_010",
+    "name": "Emergency Team Member Beta",
+    "phone_number": "+10000000002",
+    "latitude": 11.6850,
+    "longitude": 76.1300,
+    "zone_name": "Wayanad Monsoon Inundation Zone",
+    "notes": "Team placeholder"
+  }
+]

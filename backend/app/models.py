@@ -126,3 +126,49 @@ class Report(Base):
     status = Column(String(50), default="final")
     
     zone = relationship("Zone", back_populates="reports")
+
+
+# --- Twilio Alerting & Two-Way Resident Engagement Models ---
+
+class NotificationLog(Base):
+    __tablename__ = "notification_logs"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    resident_name = Column(String(255), nullable=True)
+    phone_number = Column(String(50), nullable=False, index=True)
+    zone_id = Column(Integer, ForeignKey("zones.id"), nullable=True, index=True)
+    channel = Column(String(50), default="whatsapp") # "whatsapp", "sms"
+    status = Column(String(50), default="success")   # "success", "failed"
+    message_body = Column(Text, nullable=True)
+    error_message = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class ResidentReply(Base):
+    __tablename__ = "resident_replies"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    phone_number = Column(String(50), nullable=False, index=True)
+    zone_id = Column(Integer, ForeignKey("zones.id"), nullable=True, index=True)
+    reply_text = Column(Text, nullable=False)
+    status = Column(String(50), nullable=False) # "SAFE", "HELP", "UNKNOWN"
+    timestamp = Column(DateTime, default=datetime.utcnow)
+
+
+class AlertDispatch(Base):
+    __tablename__ = "alert_dispatches"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    zone_id = Column(Integer, ForeignKey("zones.id"), nullable=True, index=True)
+    recipient_number = Column(String(50), nullable=False, index=True)
+    channel_used = Column(String(50), default="whatsapp") # "whatsapp", "sms_fallback", "sms"
+    twilio_sid = Column(String(100), nullable=True)
+    rationale = Column(Text, nullable=True)
+    message_body = Column(Text, nullable=True)
+    status = Column(String(50), default="sent") # "sent", "failed", "simulated"
+    reply_text = Column(Text, nullable=True)
+    reply_status = Column(String(50), nullable=True) # "SAFE", "HELP", "UNKNOWN"
+    replied_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+

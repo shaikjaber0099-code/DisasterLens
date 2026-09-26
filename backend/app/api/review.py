@@ -16,8 +16,31 @@ def get_review_queue(db: Session = Depends(get_db)):
     Returns prioritized review queue.
     Items are sorted by urgency (severity * confidence-gap) and re-ranked with Groq llama-3.1-8b-instant.
     """
+    # Auto-approve any items with confidence > 90% (0.90); only keep others in manual approval
+    high_conf_evidence = db.query(Evidence).filter(
+        Evidence.status == "pending_review",
+        Evidence.confidence > 0.90
+    ).all()
+    for ev in high_conf_evidence:
+        ev.status = "approved"
+        ev.reviewed_at = datetime.utcnow()
+        ev.operator_notes = "Auto-approved: High confidence (>90%) safety threshold met."
+
+    high_conf_summaries = db.query(SituationSummary).filter(
+        SituationSummary.status == "pending",
+        SituationSummary.confidence > 0.90
+    ).all()
+    for s in high_conf_summaries:
+        s.status = "approved"
+        s.approved_at = datetime.utcnow()
+
+    if high_conf_evidence or high_conf_summaries:
+        db.commit()
+
+    # Manual approval queue: strictly only items with confidence <= 0.90
     pending_evidence = db.query(Evidence).filter(
-        Evidence.status.in_(["pending_review", "needs_more_data"])
+        Evidence.status.in_(["pending_review", "needs_more_data"]),
+        Evidence.confidence <= 0.90
     ).order_by(Evidence.created_at.desc()).all()
 
     queue_items = []
@@ -44,9 +67,10 @@ def get_review_queue(db: Session = Depends(get_db)):
     # Re-rank using Groq fast triage
     ranked_queue = rerank_review_queue_with_groq(queue_items)
 
-    # Also include pending situation summaries
+    # Manual summaries queue: strictly only summaries with confidence <= 0.90
     pending_summaries = db.query(SituationSummary).filter(
-        SituationSummary.status == "pending"
+        SituationSummary.status == "pending",
+        SituationSummary.confidence <= 0.90
     ).order_by(SituationSummary.created_at.desc()).limit(10).all()
 
     summaries_out = []
@@ -110,6 +134,21 @@ def review_evidence(
         if pending_count == 0:
             zone.status = "approved"
             db.commit()
+
+        # Trigger Twilio two-way alerting hook if zone is critical or threat >= 90%
+        try:
+            from backend.app.notifications import trigger_post_validation_alerts
+            rationale_text = (ev.payload.get("rationale") if isinstance(ev.payload, dict) else "") or ev.operator_notes or "Critical evidence verified and approved by operator."
+            if (zone.current_severity or 0) >= 0.75 or zone.status in ["critical", "approved"]:
+                trigger_post_validation_alerts(
+                    zone_id=zone.id,
+                    validated_status="CRITICAL",
+                    confidence_score=ev.confidence or zone.current_confidence or 0.85,
+                    rationale=rationale_text[:250],
+                    db=db
+                )
+        except Exception as hook_err:
+            print(f"[Review Hook Error] {hook_err}")
 
     return ev
 

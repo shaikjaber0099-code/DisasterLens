@@ -58,7 +58,8 @@ async def analyze_image_endpoint(
 
     evidence_id = None
     if assigned_zone:
-        # Create Evidence record strictly in pending_review status
+        # Auto-approve if confidence > 90% (0.90), keep for manual approval otherwise
+        is_auto_approved = (analysis.get("confidence_0_to_1") or 0) > 0.90
         evidence = Evidence(
             zone_id=assigned_zone.id,
             type="image",
@@ -72,7 +73,9 @@ async def analyze_image_endpoint(
             },
             confidence=analysis["confidence_0_to_1"],
             model_used=analysis["model_used"],
-            status="pending_review"
+            status="approved" if is_auto_approved else "pending_review",
+            reviewed_at=datetime.utcnow() if is_auto_approved else None,
+            operator_notes="Auto-approved: High confidence (>90%)" if is_auto_approved else None
         )
         db.add(evidence)
         db.commit()

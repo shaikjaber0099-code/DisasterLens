@@ -214,16 +214,56 @@ def run_fusion_for_zone(zone_id: int, db: Session) -> Zone:
     # Generate situation summary with Groq llama-3.3-70b (with fallback)
     summary_text = generate_situation_summary_with_groq(payload)
 
-    # Record or update situation summary
+    # Record situation summary: automatically approve if confidence > 90% (0.90), keep for manual approval otherwise
+    is_auto_approved = (zone.current_confidence or 0) > 0.90
     summary = SituationSummary(
         zone_id=zone.id,
         summary_text=summary_text,
         generated_by="groq_llama-3.3-70b",
         confidence=zone.current_confidence,
-        status="pending",
+        status="approved" if is_auto_approved else "pending",
+        approved_at=datetime.utcnow() if is_auto_approved else None,
         created_at=datetime.utcnow()
     )
     db.add(summary)
+
+    # Auto-approve any pending evidence in this zone if confidence > 0.90
+    if is_auto_approved:
+        pending_evidence = db.query(Evidence).filter(
+            Evidence.zone_id == zone.id,
+            Evidence.status == "pending_review",
+            Evidence.confidence > 0.90
+        ).all()
+        for ev in pending_evidence:
+            ev.status = "approved"
+            ev.reviewed_at = datetime.utcnow()
+            ev.operator_notes = "Auto-approved: High confidence (>90%) safety threshold met."
+
     db.commit()
+
+    # Post-validation alert hook: Auto-approve >= 90% threat rate and trigger Twilio alerts
+    try:
+        from backend.app.notifications import trigger_post_validation_alerts
+        # If threat rate >= 90% (0.90) with high confidence, auto-approve directly and send alerts
+        if zone.current_severity >= 0.90 and zone.current_confidence >= 0.70:
+            zone.status = "approved"
+            db.commit()
+            trigger_post_validation_alerts(
+                zone_id=zone.id,
+                validated_status="CRITICAL",
+                confidence_score=zone.current_confidence,
+                rationale=summary_text[:250],
+                db=db
+            )
+        elif str(fusion_res.get("status", "")).upper() == "CRITICAL":
+            trigger_post_validation_alerts(
+                zone_id=zone.id,
+                validated_status="CRITICAL",
+                confidence_score=zone.current_confidence,
+                rationale=summary_text[:250],
+                db=db
+            )
+    except Exception as hook_err:
+        print(f"[Notifications Hook Error] {hook_err}")
 
     return zone

@@ -37,7 +37,7 @@ def generate_situation_summary_with_groq(zone_payload: Dict[str, Any]) -> str:
             user_prompt = f"Fused Zone Telemetry & Multi-Modal Evidence:\n```json\n{json.dumps(zone_payload, indent=2)}\n```"
 
             response = client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
+                model="qwen/qwen3.8-27b",
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt}
